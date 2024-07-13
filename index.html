@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Query Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>SQL Query Page</h1>
+        <form id="query-form">
+            <label for="table-select">Select Table:</label>
+            <select id="table-select" name="table">
+                <option value="ACUM_Customer">ACUM_Customer</option>
+                <option value="Actions">Actions</option>
+                <!-- Add more tables as needed -->
+            </select>
+            <label for="query-input">Search Query:</label>
+            <input type="text" id="query-input" name="query" required>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="loading" class="loading">Loading...</div>
+        <div id="result"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
