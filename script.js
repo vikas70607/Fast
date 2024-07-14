@@ -43,13 +43,22 @@ function displayResults(data) {
         return;
     }
 
+    const columns = Object.keys(data[0]);
+    const nonEmptyColumns = columns.filter(column => 
+        data.some(row => row[column] !== null && row[column] !== '')
+    );
+
+    if (nonEmptyColumns.length === 0) {
+        resultDiv.innerHTML = 'No results found';
+        return;
+    }
+
     const table = document.createElement('table');
     const thead = document.createElement('thead');
     const tbody = document.createElement('tbody');
 
     const headerRow = document.createElement('tr');
-    const columns = Object.keys(data[0]);
-    columns.forEach(column => {
+    nonEmptyColumns.forEach(column => {
         const th = document.createElement('th');
         th.textContent = column;
         headerRow.appendChild(th);
@@ -59,7 +68,7 @@ function displayResults(data) {
 
     data.forEach(row => {
         const tr = document.createElement('tr');
-        columns.forEach(column => {
+        nonEmptyColumns.forEach(column => {
             const td = document.createElement('td');
             td.textContent = row[column] !== null ? row[column] : '';
             tr.appendChild(td);
@@ -69,3 +78,4 @@ function displayResults(data) {
     table.appendChild(tbody);
     resultDiv.appendChild(table);
 }
+
