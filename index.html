@@ -1,28 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL Query Page</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Dynamic Dropdown from JSON File</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        .dropdown-submenu {
+            position: relative;
+        }
+
+        .dropdown-submenu .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-left: .1rem;
+            margin-right: .1rem;
+            display: none;
+        }
+
+        .dropdown-submenu:hover .dropdown-menu {
+            display: block;
+        }
+
+        .loading-animation {
+            display: none;
+            margin: 20px auto;
+            border: 8px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 8px solid #3498db;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .search-bar-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar-container input {
+            width: 300px;
+        }
+    </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>SQL Query Page</h1>
-        <form id="query-form">
-            <label for="table-select">Select Table:</label>
-            <select id="table-select" name="table">
-                <option value="ACUM_Customer">ACUM_Customer</option>
-                <option value="Actions">Actions</option>
-                <!-- Add more tables as needed -->
-            </select>
-            <label for="query-input">Search Query:</label>
-            <input type="text" id="query-input" name="query" required>
-            <button type="submit">Submit</button>
-        </form>
-        <div id="loading" class="loading">Loading...</div>
-        <div id="result"></div>
+        <div class="search-bar-container">
+            <!-- Category Dropdown Menu -->
+            <div class="btn-group">
+                <button id="categoryButton" class="btn btn-secondary dropdown-toggle"
+                    data-bs-toggle="dropdown">Category</button>
+                <ul class="dropdown-menu" id="dropdownMenu">
+                    <!-- Dynamic content will go here -->
+                </ul>
+            </div>
+
+            <!-- Search Bar -->
+            <input id="queryInput" type="text" class="form-control" placeholder="Enter query">
+
+            <!-- Search Button -->
+            <button id="searchButton" class="btn btn-primary">Search</button>
+        </div>
+
+        <!-- Loading Animation -->
+        <div class="loading-animation" id="loadingAnimation"></div>
+
+        <!-- Table for results -->
+        <table class="table table-bordered" id="resultsTable" style="display:none;">
+            <thead>
+                <tr id="tableHeader"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
-    <script src="script.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedCategory = '';
+        let selectedTable = 'Not_Available';
+
+        // Fetch the JSON data from the file
+        fetch('tables.json')
+            .then(response => response.json())
+            .then(jsonData => {
+                populateDropdown(jsonData);
+            })
+            .catch(error => console.error('Error loading JSON:', error));
+
+        // Populate dropdown from JSON data
+        function populateDropdown(jsonData) {
+            const dropdownMenu = document.getElementById('dropdownMenu');
+
+            Object.keys(jsonData).forEach(category => {
+                let categoryItem;
+
+                if (typeof jsonData[category] === 'object' && !Array.isArray(jsonData[category])) {
+                    // Has nested tables
+                    categoryItem = document.createElement('li');
+                    categoryItem.classList.add('dropdown-submenu');
+
+                    const categoryLink = document.createElement('a');
+                    categoryLink.classList.add('dropdown-item', 'dropdown-toggle');
+                    categoryLink.href = "#";
+                    categoryLink.textContent = category;
+                    categoryItem.appendChild(categoryLink);
+
+                    const subMenu = document.createElement('ul');
+                    subMenu.classList.add('dropdown-menu');
+
+                    Object.keys(jsonData[category]).forEach(table => {
+                        const subMenuItem = document.createElement('li');
+                        const tableLink = document.createElement('a');
+                        tableLink.classList.add('dropdown-item', 'table-value');
+                        tableLink.href = "#";
+                        tableLink.textContent = table;
+                        tableLink.setAttribute('data-category', category);
+                        tableLink.setAttribute('data-table', table);
+                        subMenuItem.appendChild(tableLink);
+                        subMenu.appendChild(subMenuItem);
+                    });
+
+                    categoryItem.appendChild(subMenu);
+                } else {
+                    // No nested tables
+                    categoryItem = document.createElement('li');
+                    const categoryLink = document.createElement('a');
+                    categoryLink.classList.add('dropdown-item', 'table-value');
+                    categoryLink.href = "#";
+                    categoryLink.textContent = category;
+                    categoryLink.setAttribute('data-category', category);
+                    categoryLink.setAttribute('data-table', 'Not_Available');
+                    categoryItem.appendChild(categoryLink);
+                }
+
+                dropdownMenu.appendChild(categoryItem);
+            });
+        }
+
+        // Handle subcategory click to update the category button text
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('table-value')) {
+                e.preventDefault();
+                selectedCategory = e.target.getAttribute('data-category');
+                selectedTable = e.target.getAttribute('data-table');
+                // Update the category button text
+                if (selectedTable == 'Not_Available') {
+                    document.getElementById('categoryButton').textContent = selectedCategory
+                }
+                else{
+                    document.getElementById('categoryButton').textContent = selectedCategory + " - " + selectedTable;
+                }
+            }
+        });
+
+        document.getElementById('searchButton').addEventListener('click', function () {
+            const query = document.getElementById('queryInput').value;
+
+            // Validate input
+            if (!selectedCategory || !query) {
+                alert('Please select a category, table, and enter a query!');
+                return;
+            }
+
+            // Show loading animation
+            document.getElementById('loadingAnimation').style.display = 'block';
+
+            // Prepare API request payload
+            const payload = {
+                category: selectedCategory,
+                table_name: selectedTable,
+                query: query
+            };
+
+            // Fetch data from API (replace 'your-api-url' with the actual API endpoint)
+            fetch('http://66.175.236.154/sqlgpt/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading animation
+                    document.getElementById('loadingAnimation').style.display = 'none';
+
+                    // Display the table with the received data
+                    displayTable(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('loadingAnimation').style.display = 'none';
+                    alert('Error fetching data from the API');
+                });
+        });
+
+        function displayTable(data) {
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // Display headers
+            const headers = Object.keys(data[0]);
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                tableHeader.appendChild(th);
+            });
+
+            // Display rows
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header];
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+
+            document.getElementById('resultsTable').style.display = 'table';
+        }
+    </script>
 </body>
+
 </html>
