@@ -1,71 +1,107 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
+.dropdown-submenu {
+    position: relative;
 }
 
-.container {
-    width: 100%;
-    margin: auto;
-    overflow: hidden;
-    padding: 20px;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+.dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-left: .1rem;
+    margin-right: .1rem;
+    display: none;
 }
 
-h1 {
-    text-align: center;
-    color: #333;
+.dropdown-submenu:hover .dropdown-menu {
+    display: block;
 }
 
-form {
+
+
+
+/* HTML: <div class="loader"></div> */
+/* HTML: <div class="loader"></div> */
+.loader {
+    margin: 20px auto;
+    display: none;
+    width: 60px;
+    aspect-ratio: 2;
+    --_g: no-repeat radial-gradient(farthest-side, #000 90%, #0000);
+    background:
+        var(--_g) 0 50%,
+        var(--_g) 50% 50%,
+        var(--_g) 50% 50%,
+        var(--_g) 100% 50%;
+    background-size: 25% 50%;
+    animation: l12 1s infinite linear;
+}
+
+@keyframes l12 {
+    33% {
+        background-position: 0 0, 50% 100%, 50% 100%, 100% 0
+    }
+
+    66% {
+        background-position: 50% 0, 0 100%, 100% 100%, 50% 0
+    }
+
+    100% {
+        background-position: 50% 50%, 0 50%, 100% 50%, 50% 50%
+    }
+}
+
+.search-bar-container {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
-label {
+.search-bar-container .btn-group {
     margin-right: 10px;
-    align-self: center;
+    /* Space between category button and search bar */
 }
 
-select, input[type="text"], button {
-    margin-right: 10px;
-    padding: 5px;
-    width: 300px;
+.search-bar-container input {
+    flex: 1;
+    /* Take up remaining space */
 }
 
-button {
-    cursor: pointer;
-    background-color: #333;
-    color: #fff;
-    border: none;
-    padding: 10px;
+.search-bar-container .btn-primary {
+    margin-left: 10px;
+    /* Space between search bar and search button */
 }
 
-.loading {
-    display: none;
-    text-align: center;
-    font-size: 18px;
-    color: #333;
+.search-bar-container .form-control {
+    flex-grow: 1;
+    /* Make sure the input field grows to fill space */
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
     margin-top: 20px;
 }
 
-table, th, td {
+.card {
     border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
 }
 
-th, td {
-    padding: 8px;
-    text-align: left;
+.card-header {
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
-th {
-    background-color: #f2f2f2;
+.card-body {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.card-item {
+    margin: 5px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
 }
